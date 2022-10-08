@@ -1,0 +1,50 @@
+cardano-cli address build --payment-script-file alwaysTrueV2.plutus --testnet-magic 2 --out-file typedAlwaysSucceeds.addr
+cardano-cli query utxo --address $(cat typedAlwaysSucceeds.addr) --testnet-magic 2
+
+cardano-cli address key-gen \
+--verification-key-file payment.vkey \
+--signing-key-file payment.skey
+
+cardano-cli address build \
+--payment-verification-key-file payment.vkey \
+--out-file payment.addr \
+--testnet-magic 2
+
+cardano-cli query utxo --address $(cat payment.addr) --testnet-magic 2
+
+cardano-cli transaction build --babbage-era --testnet-magic 2 \
+--tx-in 25c3a025d0166365d552be09c3e63216da0cd7ba816847ec9b9af8716b908b7f#0 \
+--tx-out $(cat typedAlwaysSucceeds.addr)+5000000 \
+--tx-out-datum-hash-file myDatum.json \
+--change-address $(cat payment.addr) \
+--out-file tx.raw
+
+cardano-cli transaction txid --tx-body-file tx.raw
+cardano-cli transaction sign --tx-body-file tx.raw --signing-key-file payment.skey --testnet-magic 2 --out-file tx.signed
+cardano-cli transaction submit --testnet-magic 2 --tx-file tx.signed 
+
+cardano-cli transaction build --babbage-era --testnet-magic 2 \
+--tx-in 11e22ebf2af70390ec248e6ea6ef5e5c49b9ea7624ac1a7159eb6357546cae7f#0 \
+--tx-out $(cat payment.addr)+15000000 \
+--tx-out-reference-script-file alwaysTrueV2.plutus \
+--change-address $(cat payment.addr) \
+--out-file tx.raw
+
+cardano-cli transaction build --babbage-era --testnet-magic 2 \
+--tx-in 26c9ff6341705da215e92b720aa84fe3be0ab96f412b629aa6e589a5209a0a5c#0 \
+--tx-out $(cat payment.addr)+50000000 \
+--change-address $(cat payment.addr) \
+--out-file tx.raw
+
+cardano-cli query utxo --tx-in 26c9ff6341705da215e92b720aa84fe3be0ab96f412b629aa6e589a5209a0a5c#1 --testnet-magic 2 --out-file tx.json && cat tx.json
+
+cardano-cli transaction build --babbage-era --testnet-magic 2 \
+--tx-in 11e22ebf2af70390ec248e6ea6ef5e5c49b9ea7624ac1a7159eb6357546cae7f#1 \
+--tx-in-collateral 5a6b938debc6b2c9bc425c7fa35b59fc50e1e1654fa97f009b21dc6742925332#1 \
+--spending-tx-in-reference 26c9ff6341705da215e92b720aa84fe3be0ab96f412b629aa6e589a5209a0a5c#1 \
+--spending-plutus-script-v2 \
+--spending-reference-tx-in-datum-file myDatum.json \
+--spending-reference-tx-in-redeemer-file myDatum.json \
+--change-address $(cat payment.addr) \
+--protocol-params-file pp.json \
+--out-file tx.raw
