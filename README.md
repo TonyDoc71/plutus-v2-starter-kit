@@ -1,12 +1,12 @@
 # Plutus Hello World
 
-This is a bare bones Plutus smart-contract template. The goal is to provide the minimum expression of a Plutus project to be used as starting point to build more complex contracts.
+This is a bare bones PlutusV2 smart-contract template. The goal is to provide the minimum expression of a PlutusV2 project to be used as starting point to build more complex contracts. **Demostrating one of the new features in PlutusV2** ([Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033)).
 
 ## Dev Environment
 
-To build the script you'll need the Haskell toolchain (GCH, Cabal, etc) and several dependencies from IOHK repositories. Once you've compiled the source code into a Plutus script, you'll need a fully-synced Cardano Node and the `cardano-cli` binary in order to submit example transactions to the Blockchain.
+To build the script you'll need the Haskell toolchain (GCH, Cabal, etc) and several dependencies from IOHK repositories. Once you've compiled the source code into a PlutusV2 script, you'll need a fully-synced Cardano Node and the `cardano-cli` binary in order to submit example transactions to the Blockchain.
 
-If you don't want to install the required components yourself, you can use [Demeter.run](https://demeter.run) platform to create a cloud environment with access to common Cardano infrastrcuture. The following command will open this repo in a private, web-based VSCode IDE with all of the required Haskell toolchain, access to a shared Cardano Node and a pre-installed binary of the `cardano-cli`.
+If you don't want to install the required components yourself and setup a fully synchronized `cardano-node`, you can use [Demeter.run](https://demeter.run) platform to create a cloud environment with access to common Cardano infrastrcuture. The following command will open this repo in a private, web-based VSCode IDE with all of the required Haskell toolchain, access to a fully synchronized shared Cardano Node and a pre-installed binary of the `cardano-cli`.
 
 [![Code in Cardano Workspace](https://demeter.run/code/badge.svg)](https://demeter.run/code?repository=https://github.com/txpipe/plutus-starter-kit.git&template=plutus)
 
@@ -20,34 +20,147 @@ The source code for the Plutus contract lives in the `src/Hello` folder. The `Co
 The entry point for the Cabal project lives in `Main.hs` and can be used to trigger the serialization. Run the following command from the workspace terminal:
 
 ```sh
-cabal run plutus-starter-kit -- assets/contract.plutus
+cabal run plutus-starter-kit -- assets/alwaysTrueV2.plutus
 ```
 
 > **Note**
 > The _Cardano Workspace_ provides a cached version of the Cardano api dependencies. This greatly accelerates the build process.
 
-When the command finishes, you should get a `assets/contract.plutus` file that contains a JSON envelope of the UPLC code. This file can be used to submit transactions on-chain.
+When the command finishes, you should get a `assets/alwaysTrueV2.plutus` file that contains a JSON envelope of the UPLC code. This file can be used to submit transactions on-chain.
 
 ```json
 {
-    "type": "PlutusScriptV1",
+    "type": "PlutusScriptV2",
     "description": "",
-    "cborHex": "5907c05907bd0100003232323232323232323...
+    "cborHex": "5907b65907b30100003232323232323232323232...
 }
 ```
+
+# Testnet Demo via cardano-cli
+
+## Setup
 
 To construct on-chain transactions, we'll need the address of the script we've just compiled. For this, run the following command:
 
 ```sh
 cardano-cli address build \
-  --payment-script-file ./assets/contract.plutus \
+  --payment-script-file ./assets/alwaysTrueV2.plutus \
   --testnet-magic 2 \
-  --out-file ./assets/mainnet.addr
+  --out-file ./assets/alwaysTrueV2.addr
 ```
 
 > **Note**
 > The flag `--testnet-magic 2` in the above command assumes that you're working with the `preview` network. If you're working with a different testnet, change the magic value to match your requirements or replace the flag for `--mainnet` if you're connected to mainnet.
 
-## System Requirements
+Next we will need to generate a `payment` key-pair that will serve as our `Cardano Wallet`:
+
+```sh
+cardano-cli address key-gen \
+--verification-key-file ./assets/payment.vkey \
+--signing-key-file ./assets/payment.skey
+```
+
+Using the key-pair we will then generate our wallet address:
+
+```sh
+cardano-cli address build \
+--payment-verification-key-file ./assets/payment.vkey \
+--out-file ./assets/payment.addr \
+--testnet-magic 2
+```
+
+We can view the actual wallet address value with the following command:
+
+```sh
+cat ./assets/payment.addr
+> addr_test1vp0l8elw4c5zr224869vvw2qldwpekym72q529nj4gzlhfgmaan79
+```
+
+Assuming you just generated the `payment` keys and wallet address, then there should be no balance available.
+
+> **Note**
+> If you have an existing `payment` key-pair feel free to use that instead.
+
+We can check the `balance` or `utxos` inside the wallet address with the following command:
+
+```sh
+cardano-cli query utxo --address $(cat ./assets/payment.addr) --testnet-magic 2
+
+                           TxHash                                 TxIx        Amount
+--------------------------------------------------------------------------------------
+```
+You can obtain some `test ADA` or `tADA` via the [Cardano Testnet Faucet](https://docs.cardano.org/cardano-testnet/tools/faucet).
+
+> **Note**
+> If you are using `--testnet-magic 2` then you should choose `preview` network in the faucet options.
+
+Once you have requested some funds via the [Cardano Testnet Faucet](https://docs.cardano.org/cardano-testnet/tools/faucet). then querying your wallet address `utxos` should looke like this:
+
+
+```sh
+                           TxHash                                 TxIx        Amount
+--------------------------------------------------------------------------------------
+
+5a6b938debc6b2c9bc425c7fa35b59fc50e1e1654fa97f009b21dc6742925332     1        10000000000 lovelace + TxOutDatumNone
+```
+
+## Testing the AlwaysTrue Plutus contract
+
+To test the contract we can try to send `5 ADA` to the contract address and try to unlock it annd send it back to your wallet address.
+
+We can send `ADA` to the contract with the following command:
+
+```sh
+# Build the transaction
+cardano-cli transaction build --babbage-era --testnet-magic 2 \
+--tx-in TxHash#TxIndex \
+--tx-out $(cat ./assets/typedAlwaysSucceeds.addr)+5000000 \
+--tx-out-datum-hash-file ./assets/myDatum.json \
+--change-address $(cat ./assets/payment.addr) \
+--out-file ./assets/tx.raw
+```
+
+Make sure you put the proper `TxHash` and `TxIndex` with your available wallet `utxos`.
+
+Since the contract will always allow any asset to be unlocked from it and ignores whatever `datum` and `redeemer` you pass into it. We attached an arbitrary `datum` to the transaction `--tx-out-datum-hash-file ./assets/myDatum.json`
+
+```json
+{
+	"constructor": 0,
+	"fields": [{
+		"int": 42
+	}]
+}
+```
+
+Next we sign and submit the transaction:
+
+```sh
+# Sign with your payment signing key
+cardano-cli transaction sign --tx-body-file ./assets/tx.raw --signing-key-file ./assets/payment.skey --testnet-magic 2 --out-file ./assets/tx.signed
+
+# Submit the transaction to the Cardano Network
+cardano-cli transaction submit --testnet-magic 2 --tx-file ./assets/tx.signed 
+```
+
+We can query the `utxos` of the contract address:
+
+```sh
+cardano-cli query utxo --address $(cat ./assets/typedAlwaysSucceeds.addr) --testnet-magic 2
+
+                           TxHash                                 TxIx        Amount
+--------------------------------------------------------------------------------------
+9b70ea82b9fad0a811372637a0753c94d62e1c69c9006b5e1fccc6e471a760db     1        5000000 lovelace + TxOutDatumHash ScriptDataInBabbageEra "fcaa61fb85676101d9e3398a484674e71c45c3fd41b492682f3b0054f4cf3273"
+```
+
+We should be able to see the `5 ADA` we just sent to the contract.
+
+> **Note**
+> It might take 20 seconds or more for the transaction to propagate throughout the network depending on the network health, so you will have to be patient.
+
+### Reference Scripts
+
+
+# System Requirements
 
 * git@github.com:bitcoin-core/secp256k1.git

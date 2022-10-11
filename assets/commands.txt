@@ -13,7 +13,8 @@ cardano-cli address build \
 cardano-cli query utxo --address $(cat payment.addr) --testnet-magic 2
 
 cardano-cli transaction build --babbage-era --testnet-magic 2 \
---tx-in 25c3a025d0166365d552be09c3e63216da0cd7ba816847ec9b9af8716b908b7f#0 \
+--tx-in 21dc43bf8fe518c34aee4992b72350fa4e42436fa269cbbf995569663c4af254#0 \
+--tx-in 5a6b938debc6b2c9bc425c7fa35b59fc50e1e1654fa97f009b21dc6742925332#1 \
 --tx-out $(cat typedAlwaysSucceeds.addr)+5000000 \
 --tx-out-datum-hash-file myDatum.json \
 --change-address $(cat payment.addr) \
@@ -24,24 +25,24 @@ cardano-cli transaction sign --tx-body-file tx.raw --signing-key-file payment.sk
 cardano-cli transaction submit --testnet-magic 2 --tx-file tx.signed 
 
 cardano-cli transaction build --babbage-era --testnet-magic 2 \
---tx-in 11e22ebf2af70390ec248e6ea6ef5e5c49b9ea7624ac1a7159eb6357546cae7f#0 \
+--tx-in 5a6b938debc6b2c9bc425c7fa35b59fc50e1e1654fa97f009b21dc6742925332#0 \
 --tx-out $(cat payment.addr)+15000000 \
 --tx-out-reference-script-file alwaysTrueV2.plutus \
 --change-address $(cat payment.addr) \
 --out-file tx.raw
 
 cardano-cli transaction build --babbage-era --testnet-magic 2 \
---tx-in 26c9ff6341705da215e92b720aa84fe3be0ab96f412b629aa6e589a5209a0a5c#0 \
+--tx-in 21dc43bf8fe518c34aee4992b72350fa4e42436fa269cbbf995569663c4af254#0 \
 --tx-out $(cat payment.addr)+50000000 \
 --change-address $(cat payment.addr) \
 --out-file tx.raw
 
-cardano-cli query utxo --tx-in 26c9ff6341705da215e92b720aa84fe3be0ab96f412b629aa6e589a5209a0a5c#1 --testnet-magic 2 --out-file tx.json && cat tx.json
+cardano-cli query utxo --tx-in c0017afd0d73394df38687f3df821943391baa9d2245a37882a95a6fc38fd24f#1 --testnet-magic 2 --out-file tx.json && jq | cat tx.json
 
 cardano-cli transaction build --babbage-era --testnet-magic 2 \
---tx-in 11e22ebf2af70390ec248e6ea6ef5e5c49b9ea7624ac1a7159eb6357546cae7f#1 \
+--tx-in 21dc43bf8fe518c34aee4992b72350fa4e42436fa269cbbf995569663c4af254#1 \
 --tx-in-collateral 5a6b938debc6b2c9bc425c7fa35b59fc50e1e1654fa97f009b21dc6742925332#1 \
---spending-tx-in-reference 26c9ff6341705da215e92b720aa84fe3be0ab96f412b629aa6e589a5209a0a5c#1 \
+--spending-tx-in-reference c0017afd0d73394df38687f3df821943391baa9d2245a37882a95a6fc38fd24f#1 \
 --spending-plutus-script-v2 \
 --spending-reference-tx-in-datum-file myDatum.json \
 --spending-reference-tx-in-redeemer-file myDatum.json \
