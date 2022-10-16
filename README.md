@@ -1,4 +1,4 @@
-# Plutus Hello World
+# PlutusV2 Hello World
 
 This is a bare bones PlutusV2 smart-contract template. The goal is to provide the minimum expression of a PlutusV2 project to be used as starting point to build more complex contracts. **Demostrating one of the new features in PlutusV2** ([Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033)).
 
@@ -40,7 +40,7 @@ When the command finishes, you should get a `assets/alwaysTrueV2.plutus` file th
 
 ## Setup
 
-To construct on-chain transactions, we'll need the address of the script we've just compiled. For this, run the following command:
+To construct on-chain transactions, we'll need the address of the  `plutus` script we've just compiled. For this, run the following command:
 
 ```sh
 cardano-cli address build \
@@ -76,7 +76,7 @@ cat ./assets/payment.addr
 > addr_test1vp0l8elw4c5zr224869vvw2qldwpekym72q529nj4gzlhfgmaan79
 ```
 
-Assuming you just generated the `payment` keys and wallet address, then there should be no balance available.
+Assuming you just generated the `payment` keys and wallet address as instructed above, then there should be no balance available.
 
 > **Note**
 > If you have an existing `payment` key-pair feel free to use that instead.
@@ -106,7 +106,7 @@ Once you have requested some funds via the [Cardano Testnet Faucet](https://docs
 
 ## Testing the AlwaysTrue Plutus contract
 
-To test the contract we can try to send `5 ADA` to the contract address and try to unlock it annd send it back to your wallet address.
+To test the contract we can try to send `5 ADA` to the contract address and try to unlock it and send it back to your wallet address.
 
 We can send `ADA` to the contract with the following command:
 
@@ -119,8 +119,8 @@ cardano-cli transaction build --babbage-era --testnet-magic 2 \
 --change-address $(cat ./assets/payment.addr) \
 --out-file ./assets/tx.raw
 ```
-
-Make sure you put the proper `TxHash` and `TxIndex` with your available wallet `utxos`.
+> **Note**
+> Make sure you put the proper `TxHash` and `TxIndex` with your available wallet `utxos`.
 
 Since the contract will always allow any asset to be unlocked from it and ignores whatever `datum` and `redeemer` you pass into it. We attached an arbitrary `datum` to the transaction `--tx-out-datum-hash-file ./assets/myDatum.json`
 
@@ -160,6 +160,66 @@ We should be able to see the `5 ADA` we just sent to the contract.
 
 ### Reference Scripts
 
+One important feature that the recent [Cardano Vasil Hard Fork]() has enabled is something called [Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033). It essentially allows transactions to reference a plutus script rather than requiring it to be attached to the transaction, which was the case with `PlutusV1`. Ultimately saving room for more transaction size and fees to allocate elsewhere if needed.
+
+The following command will upload a `plutus` script to the `cardano` blockchain and use it as a reference script.
+
+```sh
+cardano-cli transaction build --babbage-era --testnet-magic 2 \
+--tx-in TxHash#TxIndex \
+--tx-out $(cat payment.addr)+15000000 \
+--tx-out-reference-script-file alwaysTrueV2.plutus \
+--change-address $(cat payment.addr) \
+--out-file tx.raw
+```
+
+> **Note**
+> Make sure you put the proper `TxHash` and `TxIndex` with your available wallet `utxos`.
+
+Before interacting with `Cardano Smart-Contracts`, a user needs to have a `utxo` with a minimum amount of `ADA` that can be used as [collateral](https://docs.cardano.org/plutus/collateral-mechanism).  (e.g `5 ADA`)
+
+> **Note**
+> Although the **Vasil** hardfork has improved the concept of collateral in cardano, We will cover it in this document so we will use the `Alonzo era` usage of collateral.
+
+```sh
+# Send 5 ADA to yourself to be used as collateral input
+cardano-cli transaction build --babbage-era --testnet-magic 2 \
+--tx-in 21dc43bf8fe518c34aee4992b72350fa4e42436fa269cbbf995569663c4af254#0 \
+--tx-out $(cat payment.addr)+50000000 \
+--change-address $(cat payment.addr) \
+--out-file ./assets/tx.raw
+
+# Sign with your payment signing key
+cardano-cli transaction sign --tx-body-file ./assets/tx.raw --signing-key-file ./assets/payment.skey --testnet-magic 2 --out-file ./assets/tx.signed
+
+# Submit the transaction to the Cardano Network
+cardano-cli transaction submit --testnet-magic 2 --tx-file ./assets/tx.signed 
+
+```
+
+Finally we can execute the script logic to **unlock** the `5 ADA` we have **locked** previously at the contract address.
+
+```sh
+# Unlock the 5 ADA from the contract address and send it to your wallet address
+cardano-cli transaction build --babbage-era --testnet-magic 2 \
+--tx-in LockedUTXOTxHash#LockedUTXOTxIndex \
+--tx-in-collateral CollateralTxHash#CollateralTxIndex \
+--spending-tx-in-reference RefScriptTxHash#RefScriptTxIndex \
+--spending-plutus-script-v2 \
+--spending-reference-tx-in-datum-file ./assets/myDatum.json \
+--spending-reference-tx-in-redeemer-file ./assets/myDatum.json \
+--change-address $(cat ./assets/payment.addr) \
+--protocol-params-file ./assets/pp.json \
+--out-file ./assets/tx.raw
+
+# Sign with your payment signing key
+cardano-cli transaction sign --tx-body-file ./assets/tx.raw --signing-key-file ./assets/payment.skey --testnet-magic 2 --out-file ./assets/tx.signed
+
+# Submit the transaction to the Cardano Network
+cardano-cli transaction submit --testnet-magic 2 --tx-file ./assets/tx.signed 
+```
+
+Congratulations 🎊🎊🎊, you have compiled and interacted with a `Cardano on-chain PlutusV2 script` using the [Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033) feature!
 
 # System Requirements
 
