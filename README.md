@@ -192,8 +192,8 @@ Before interacting with `Cardano Smart-Contracts`, a user needs to have a `utxo`
 # Send 5 ADA to yourself to be used as collateral input
 cardano-cli transaction build --babbage-era --testnet-magic 2 \
 --tx-in 21dc43bf8fe518c34aee4992b72350fa4e42436fa269cbbf995569663c4af254#0 \
---tx-out $(cat payment.addr)+50000000 \
---change-address $(cat payment.addr) \
+--tx-out $(cat ./assets/payment.addr)+50000000 \
+--change-address $(cat ./assets/payment.addr) \
 --out-file ./assets/tx.raw
 
 # Sign with your payment signing key
