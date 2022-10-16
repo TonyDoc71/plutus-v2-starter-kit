@@ -165,12 +165,19 @@ One important feature that the recent [Cardano Vasil Hard Fork]() has enabled is
 The following command will upload a `plutus` script to the `cardano` blockchain and use it as a reference script.
 
 ```sh
+# Build Tx wih a plutus reference script attached to it
 cardano-cli transaction build --babbage-era --testnet-magic 2 \
 --tx-in TxHash#TxIndex \
 --tx-out $(cat payment.addr)+15000000 \
 --tx-out-reference-script-file alwaysTrueV2.plutus \
 --change-address $(cat payment.addr) \
 --out-file tx.raw
+
+# Sign with your payment signing key
+cardano-cli transaction sign --tx-body-file ./assets/tx.raw --signing-key-file ./assets/payment.skey --testnet-magic 2 --out-file ./assets/tx.signed
+
+# Submit the transaction to the Cardano Network
+cardano-cli transaction submit --testnet-magic 2 --tx-file ./assets/tx.signed
 ```
 
 > **Note**
