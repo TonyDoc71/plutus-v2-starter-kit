@@ -52,7 +52,7 @@ cardano-cli address build \
 > **Note**
 > The flag `--testnet-magic 2` in the above command assumes that you're working with the `preview` network. If you're working with a different testnet, change the magic value to match your requirements or replace the flag for `--mainnet` if you're connected to mainnet.
 
-Next we will need to generate a `payment` key-pair that will serve as our `Cardano Wallet`:
+Next we will need to generate a `payment` key-pair that will serve as our `Cardano Wallet Key`:
 
 ```sh
 cardano-cli address key-gen \
@@ -122,7 +122,7 @@ cardano-cli transaction build --babbage-era --testnet-magic 2 \
 > **Note**
 > Make sure you put the proper `TxHash` and `TxIndex` with your available wallet `utxos`.
 
-Since the contract will always allow any asset to be unlocked from it and ignores whatever `datum` and `redeemer` you pass into it. We attached an arbitrary `datum` to the transaction `--tx-out-datum-hash-file ./assets/myDatum.json`
+Since the contract will always allow any asset to be unlocked from it and ignores whatever `datum` and `redeemer` you pass into it. We attach a arbitrary `datum` to the transaction `--tx-out-datum-hash-file ./assets/myDatum.json`
 
 ```json
 {
@@ -179,7 +179,7 @@ cardano-cli transaction build --babbage-era --testnet-magic 2 \
 Before interacting with `Cardano Smart-Contracts`, a user needs to have a `utxo` with a minimum amount of `ADA` that can be used as [collateral](https://docs.cardano.org/plutus/collateral-mechanism).  (e.g `5 ADA`)
 
 > **Note**
-> Although the **Vasil** hardfork has improved the concept of collateral in cardano, We will cover it in this document so we will use the `Alonzo era` usage of collateral.
+> Although the **Vasil** hardfork has improved the concept of collateral in cardano, We will not cover it in this document so we will use the (old) `Alonzo era` usage of collateral.
 
 ```sh
 # Send 5 ADA to yourself to be used as collateral input
@@ -197,7 +197,7 @@ cardano-cli transaction submit --testnet-magic 2 --tx-file ./assets/tx.signed
 
 ```
 
-Finally we can execute the script logic to **unlock** the `5 ADA` we have **locked** previously at the contract address.
+Finally we can execute the script logic to **unlock** the `5 ADA` that we have **locked** previously at the contract address.
 
 ```sh
 # Unlock the 5 ADA from the contract address and send it to your wallet address
@@ -218,6 +218,11 @@ cardano-cli transaction sign --tx-body-file ./assets/tx.raw --signing-key-file .
 # Submit the transaction to the Cardano Network
 cardano-cli transaction submit --testnet-magic 2 --tx-file ./assets/tx.signed 
 ```
+> **Breakdown**
+> 
+> - `LockedUTXOTxHash#LockedUTXOTxIndex` is the UTXO of the `ADA` you locked at the script address.
+> - `CollateralTxHash#CollateralTxIndex` is the UTXO of the `5 ADA` we sent to our wallet address that we will use as collateral.
+> - `RefScriptTxHash#RefScriptTxIndex` is the UTXO of the [Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033) we uploaded above to be used as the `validation logic` for this transaction.
 
 Congratulations 🎊🎊🎊, you have compiled and interacted with a `Cardano on-chain PlutusV2 script` using the [Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033) feature!
 
