@@ -225,6 +225,10 @@ cardano-cli transaction sign --tx-body-file ./assets/tx.raw --signing-key-file .
 # Submit the transaction to the Cardano Network
 cardano-cli transaction submit --testnet-magic 2 --tx-file ./assets/tx.signed 
 ```
+
+> **Note**
+> We did not have to attach a `.plutus` script in this transaction and instead used a reference of the `.plutus` script we wanted to execute!
+
 > **Breakdown**
 > 
 > - `LockedUTXOTxHash#LockedUTXOTxIndex` is the UTXO of the `ADA` you locked at the script address.
