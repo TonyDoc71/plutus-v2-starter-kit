@@ -168,10 +168,10 @@ The following command will upload a `plutus` script to the `cardano` blockchain 
 # Build Tx wih a plutus reference script attached to it
 cardano-cli transaction build --babbage-era --testnet-magic 2 \
 --tx-in TxHash#TxIndex \
---tx-out $(cat payment.addr)+15000000 \
---tx-out-reference-script-file alwaysTrueV2.plutus \
---change-address $(cat payment.addr) \
---out-file tx.raw
+--tx-out $(cat ./assets/payment.addr)+15000000 \
+--tx-out-reference-script-file ./assets/alwaysTrueV2.plutus \
+--change-address $(cat ./assets/payment.addr) \
+--out-file ./assets/tx.raw
 
 # Sign with your payment signing key
 cardano-cli transaction sign --tx-body-file ./assets/tx.raw --signing-key-file ./assets/payment.skey --testnet-magic 2 --out-file ./assets/tx.signed
