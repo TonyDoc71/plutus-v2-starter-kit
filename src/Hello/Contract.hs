@@ -12,7 +12,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ImportQualifiedPost #-}
 
-module Hello.Contract (validator, wrapped, serialized, hash) where
+
+module Hello.Contract (validator, wrapped, serialized, hash, HelloDatum (..), HelloRedeemer (..)) where
 
 import Cardano.Api.Shelley (PlutusScript (..), PlutusScriptV2)
 import Codec.Serialise (serialise)
@@ -23,6 +24,7 @@ import qualified Plutus.V1.Ledger.Scripts as Scripts
 import Plutus.V2.Ledger.Api qualified as PlutusV2
 import PlutusTx
 import PlutusTx.Prelude
+import Cardano.Api
 
 newtype MyCustomDatum = MyCustomDatum Integer
 PlutusTx.unstableMakeIsData ''MyCustomDatum
