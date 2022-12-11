@@ -40,6 +40,12 @@ When the command finishes, you should get a `assets/alwaysTrueV2.plutus` file th
 
 ## Setup
 
+First we make sure our `protocol-parameters` are updated by executing the following command:
+
+```sh
+cardano-cli query protocol-parameters --testnet-magic 2 > ./assets/pp.json
+```
+
 To construct on-chain transactions, we'll need the address of the  `plutus` script we've just compiled. For this, run the following command:
 
 ```sh
