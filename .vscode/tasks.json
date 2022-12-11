@@ -32,7 +32,7 @@
       {
         "label": "Serialize to UPLC",
         "command": "cabal",
-        "args": ["run", "plutus-starter-kit", "--", "assets/contract.plutus"],
+        "args": ["run", "plutus-starter-kit", "--", "assets/alwaysTrueV2.plutus"],
         "presentation": {
           "panel": "shared",
           "group": "cabal"
