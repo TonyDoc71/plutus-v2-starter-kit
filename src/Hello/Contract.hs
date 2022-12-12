@@ -15,7 +15,7 @@
 
 module Hello.Contract (validator, wrapped, serialized, hash, HelloDatum (..), HelloRedeemer (..)) where
 
-import Cardano.Api.Shelley (PlutusScript (..), PlutusScriptV2)
+import Cardano.Api.Shelley (PlutusScript (..))
 import Codec.Serialise (serialise)
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Short as BSS
@@ -26,14 +26,14 @@ import PlutusTx
 import PlutusTx.Prelude
 import Cardano.Api
 
-newtype MyCustomDatum = MyCustomDatum Integer
-PlutusTx.unstableMakeIsData ''MyCustomDatum
-newtype MyCustomRedeemer = MyCustomRedeemer Integer
-PlutusTx.unstableMakeIsData ''MyCustomRedeemer
+newtype HelloDatum = HelloDatum Integer
+PlutusTx.unstableMakeIsData ''HelloDatum
+newtype HelloRedeemer = HelloRedeemer Integer
+PlutusTx.unstableMakeIsData ''HelloRedeemer
 
 -- This validator always validates true
 {-# INLINABLE run #-}
-run :: MyCustomDatum -> MyCustomRedeemer -> PlutusV2.ScriptContext -> Bool
+run :: HelloDatum -> HelloRedeemer -> PlutusV2.ScriptContext -> Bool
 run _ _ _ = True
 
 -- Entry
