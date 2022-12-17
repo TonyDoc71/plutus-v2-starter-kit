@@ -154,7 +154,7 @@ cardano-cli transaction submit --testnet-magic ${CARDANO_NODE_MAGIC} --tx-file .
 We can query the `utxos` of the contract address:
 
 ```sh
-cardano-cli query utxo --address $(cat ./assets/typedAlwaysSucceeds.addr) --testnet-magic ${CARDANO_NODE_MAGIC}
+cardano-cli query utxo --address $(cat ./assets/alwaysTrueV2.addr) --testnet-magic ${CARDANO_NODE_MAGIC}
 
                            TxHash                                 TxIx        Amount
 --------------------------------------------------------------------------------------
