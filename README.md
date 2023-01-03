@@ -122,7 +122,7 @@ We can send `ADA` to the contract with the following command:
 # Build the transaction
 cardano-cli transaction build --babbage-era --testnet-magic ${CARDANO_NODE_MAGIC} \
 --tx-in TxHash#TxIndex \
---tx-out $(cat ./assets/typedAlwaysSucceeds.addr)+5000000 \
+--tx-out $(cat ./assets/alwaysTrueV2.addr)+5000000 \
 --tx-out-datum-hash-file ./assets/myDatum.json \
 --change-address $(cat ./assets/payment.addr) \
 --out-file ./assets/tx.raw
@@ -154,7 +154,7 @@ cardano-cli transaction submit --testnet-magic ${CARDANO_NODE_MAGIC} --tx-file .
 We can query the `utxos` of the contract address:
 
 ```sh
-cardano-cli query utxo --address $(cat ./assets/typedAlwaysSucceeds.addr) --testnet-magic ${CARDANO_NODE_MAGIC}
+cardano-cli query utxo --address $(cat ./assets/alwaysTrueV2.addr) --testnet-magic ${CARDANO_NODE_MAGIC}
 
                            TxHash                                 TxIx        Amount
 --------------------------------------------------------------------------------------
