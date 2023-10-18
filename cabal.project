@@ -17,6 +17,12 @@ packages:
 
 flags: -scrypt
 
+index-state: 2022-11-14T00:20:02Z
+
+index-state:
+  , hackage.haskell.org 2022-11-14T00:20:02Z
+  , cardano-haskell-packages 2022-11-17T04:56:26Z
+
 -- We never, ever, want this.
 write-ghc-environment-files: never
 

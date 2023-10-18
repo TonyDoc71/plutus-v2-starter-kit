@@ -1,14 +1,19 @@
 module Main where
 
+import Cardano.Api
 import Options.Applicative
-import qualified Hello.Utils as Utils
+import Hello.Contract
 
-type Opts = FilePath
+data Options = Options
+    { outputFile :: String }
 
-opts :: ParserInfo Opts
-opts =
-  let parseOpts = argument str . mconcat $ [metavar "FILE", help "File to which the plutus script will be written"]
-   in info (parseOpts <**> helper) . mconcat $ [fullDesc, progDesc "Create a smart contract for bulk purchases"]
+parser :: Parser FilePath
+parser = argument str (metavar "FILENAME" <> help "Output filename for the Plutus script")
 
 main :: IO ()
-main = execParser opts >>= Utils.writePlutusFile
+main = do
+    filename <- execParser (info parser briefDesc)
+    result <- writeFileTextEnvelope filename Nothing serializedScript
+    case result of
+        Left err -> putStrLn $ "Error: " ++ show err
+        Right () -> return ()

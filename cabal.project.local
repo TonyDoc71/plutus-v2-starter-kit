@@ -1,8 +1,5 @@
 ignore-project: False
 with-compiler: ghc-8.10.7
-package trace-dispatcher
-  ghc-options: -Wwarn
 
-package HsOpenSSL
-  flags: -homebrew-openssl
-
+package cardano-crypto-praos
+  flags: -external-libsodium-vrf

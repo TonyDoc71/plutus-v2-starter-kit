@@ -2,9 +2,67 @@
 
 This is a bare bones PlutusV2 smart-contract template. The goal is to provide the minimum expression of a PlutusV2 project to be used as starting point to build more complex contracts. **Demostrating one of the new features of PlutusV2** ([Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033)).
 
-## Dev Environment
+## Manual Installation of Dependencies
 
-To build the script you'll need the Haskell toolchain (GCH, Cabal, etc) and several dependencies from IOHK repositories. There's also a requirement on the [secp256k1](https://github.com/bitcoin-core/secp256k1.git) library. Once you've compiled the source code into a Plutus script, you'll need a fully-synced Cardano Node and the `cardano-cli` binary in order to submit example transactions to the Blockchain.
+### Cardano Haskell Dependencies
+
+1. Clone the `libsodium` repository and build it:
+
+```sh
+git clone https://github.com/input-output-hk/libsodium
+cd libsodium
+git checkout 66f017f1
+./autogen.sh
+./configure
+make
+sudo make install
+```
+
+```sh
+export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
+```
+
+```sh
+git clone https://github.com/bitcoin-core/secp256k1
+cd secp256k1
+git checkout ac83be33
+./autogen.sh
+./configure --enable-module-schnorrsig --enable-experimental
+make
+make check
+sudo make install
+```
+
+```sh
+git clone https://github.com/supranational/blst
+cd blst
+./build.sh
+sudo cp libblst.a /usr/local/lib/
+```
+
+```sh
+echo 'prefix=/usr/local/lib
+libdir=${prefix}
+includedir=${prefix}
+
+Name: libblst
+Description: The BLST library
+Version: 0.3.11  # adjust this to the correct version
+Libs: -L${libdir} -lblst
+Cflags: -I${includedir}' | sudo tee /usr/local/lib/pkgconfig/libblst.pc
+```
+
+```sh
+sudo mv /path/to/blst/bindings/blst.h /usr/local/include/
+sudo mv /path/to/blst/bindings/blst_aux.h /usr/local/include/
+# You can copy this markdown content and paste it into your README file, adjusting the content as necessary to fit your project's structure and style.
+```
+```sh
+sudo apt-get install libpq-dev
+```
+
+## Dev Environment
 
 If you don't want to install the required components yourself and setup a fully synchronized `cardano-node`, you can use [Demeter.run](https://demeter.run) platform to create a cloud environment with access to common Cardano infrastrcuture. The following command will open this repo in a private, web-based VSCode IDE with all of the required Haskell toolchain, access to a fully synchronized shared Cardano Node and a pre-installed binary of the `cardano-cli`.
 
