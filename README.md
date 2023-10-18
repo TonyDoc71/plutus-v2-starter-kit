@@ -56,7 +56,6 @@ Cflags: -I${includedir}' | sudo tee /usr/local/lib/pkgconfig/libblst.pc
 ```sh
 sudo mv /path/to/blst/bindings/blst.h /usr/local/include/
 sudo mv /path/to/blst/bindings/blst_aux.h /usr/local/include/
-# You can copy this markdown content and paste it into your README file, adjusting the content as necessary to fit your project's structure and style.
 ```
 ```sh
 sudo apt-get install libpq-dev
