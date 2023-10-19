@@ -307,7 +307,6 @@ cardano-cli transaction build --babbage-era --testnet-magic ${CARDANO_NODE_MAGIC
 --spending-reference-tx-in-datum-file ./assets/myDatum.json \
 --spending-reference-tx-in-redeemer-file ./assets/myDatum.json \
 --change-address $(cat ./assets/payment.addr) \
---protocol-params-file ./assets/pp.json \
 --out-file ./assets/tx.raw
 
 # Sign with your payment signing key
