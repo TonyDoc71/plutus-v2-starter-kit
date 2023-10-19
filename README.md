@@ -1,13 +1,15 @@
 # PlutusV2 Hello World
 
-This is a bare bones PlutusV2 smart-contract template. The goal is to provide the minimum expression of a PlutusV2 project to be used as starting point to build more complex contracts. **Demostrating one of the new features of PlutusV2** ([Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033)).
+This is a bare bones PlutusV2 smart-contract template. The goal is to provide the minimum expression of a PlutusV2 project to be used as a starting point to build more complex contracts. **Demonstrating one of the new features of PlutusV2**, [Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033), which allow for more efficient transaction validation by referencing scripts on-chain.
 
 ## Manual Installation of Dependencies
 
+Before diving into the smart contract, ensure you have the necessary dependencies installed. Here's a guide on how to manually install the required Cardano and Haskell dependencies:
+
 ### Cardano Haskell Dependencies
 
-1. Clone the `libsodium` repository and build it:
-
+1. **Libsodium** - a modern, easy-to-use software library for encryption, decryption, signatures, password hashing, and more.
+   
 ```sh
 git clone https://github.com/input-output-hk/libsodium
 cd libsodium
@@ -23,6 +25,8 @@ export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
 export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
 ```
 
+Bitcoin Core Secp256k1 - a library for optimized ECDSA signature verification, a crucial component for blockchain applications.
+
 ```sh
 git clone https://github.com/bitcoin-core/secp256k1
 cd secp256k1
@@ -33,6 +37,8 @@ make
 make check
 sudo make install
 ```
+
+Supranational BLST - a library for BLS Signatures, a cryptographic primitive used for validating transactions on many blockchain platforms.
 
 ```sh
 git clone https://github.com/supranational/blst
@@ -57,35 +63,45 @@ Cflags: -I${includedir}' | sudo tee /usr/local/lib/pkgconfig/libblst.pc
 sudo mv /path/to/blst/bindings/blst.h /usr/local/include/
 sudo mv /path/to/blst/bindings/blst_aux.h /usr/local/include/
 ```
-```sh
-sudo apt-get install libpq-dev
-```
 
-## Dev Environment
+Each of these libraries is crucial for working with Cardano smart contracts and the Haskell programming environment. Ensure that you have properly installed and configured them before proceeding.
 
-If you don't want to install the required components yourself and setup a fully synchronized `cardano-node`, you can use [Demeter.run](https://demeter.run) platform to create a cloud environment with access to common Cardano infrastrcuture. The following command will open this repo in a private, web-based VSCode IDE with all of the required Haskell toolchain, access to a fully synchronized shared Cardano Node and a pre-installed binary of the `cardano-cli`.
+## Development Environment
 
-[![Code in Cardano Workspace](https://demeter.run/code/badge.svg)](https://demeter.run/code?repository=https://github.com/ADAPhilippines/plutus-v2-starter-kit.git&template=plutus)
+Setting up a local environment can be quite tedious. If you prefer a quicker setup or are not keen on managing dependencies manually, consider utilizing the [Demeter.run](https://demeter.run) platform. This platform provides a cloud-based environment equipped with the necessary Cardano infrastructure and the Haskell toolchain. It grants you access to a fully synchronized shared Cardano Node and a pre-installed binary of the `cardano-cli`. Here's how to get started:
+
+1. Click on the link below to launch a private, web-based VSCode IDE that is pre-configured with the required Haskell toolchain and a synchronized shared Cardano Node:
+   
+   [![Code in Cardano Workspace](https://demeter.run/code/badge.svg)](https://demeter.run/code?repository=https://github.com/ADAPhilippines/plutus-v2-starter-kit.git&template=plutus)
+
+2. This will open the repository in a VSCode instance within your browser, ready for you to explore, modify, and run the PlutusV2 smart contract template.
+
+> **Note**: 
+> - The provided link will direct you to a version-controlled workspace allowing you to jump-start your PlutusV2 project effortlessly.
+> - Ensure your browser allows pop-ups, as the IDE will open in a new tab or window.
+
+This cloud-based setup significantly simplifies the initial setup process, enabling you to focus more on building and testing your smart contracts on the Cardano blockchain.
 
 ## Quick Start
 
-> **Note**
-> This guide assumes that you're using a Cardano Workspace as detailed above. 
+This section will guide you through the process of compiling the validator script for a minimalistic Plutus smart contract. It's assumed that you are using a Cardano Workspace as detailed in the [Development Environment](#development-environment) section.
 
 ### Compile the Validator
 
-The source code for the Plutus contract lives in the `src/Hello` folder. The `Contracts.hs` contains a minimalistic validator logic and the required boilerplate code to serialize the Plutus-Tx code as UPLC that can be submitted on-chain.
+The source code for the Plutus contract resides in the `src/Hello` folder. Inside, the `Contracts.hs` file contains a minimalistic validator logic along with the required boilerplate code to serialize the Plutus-Tx code into UPLC format, suitable for on-chain submission.
 
-The entry point for the Cabal project lives in `Main.hs` and can be used to trigger the serialization. Run the following command from the workspace terminal:
+To compile the validator script, use the following command from the workspace terminal. This command triggers the serialization process defined in `Main.hs` and generates a file named `assets/alwaysTrueV2.plutus`:
 
 ```sh
 cabal run plutus-starter-kit -- assets/alwaysTrueV2.plutus
 ```
 
-> **Note**
-> The _Cardano Workspace_ provides a cached version of the Cardano api dependencies. This greatly accelerates the build process.
+> Note:
+>
+> The assets/alwaysTrueV2.plutus file contains a JSON envelope of the UPLC code which is ready for on-chain submission.
+The Cardano Workspace provides cached versions of the Cardano API dependencies, which significantly accelerates the build process.
 
-When the command finishes, you should get a `assets/alwaysTrueV2.plutus` file that contains a JSON envelope of the UPLC code. This file can be used to submit transactions on-chain.
+Once the command executes successfully, you'll find the generated assets/alwaysTrueV2.plutus file with content resembling the following:
 
 ```json
 {
@@ -94,18 +110,23 @@ When the command finishes, you should get a `assets/alwaysTrueV2.plutus` file th
     "cborHex": "5907c05907bd0100003232323232323232323..."
 }
 ```
+This file is now ready for use in on-chain transactions. The subsequent sections will guide you through interacting with the Cardano blockchain using this compiled Plutus script.
 
 # Testnet Demo via cardano-cli
 
+This section outlines the steps to interact with a Plutus smart contract on the Cardano testnet using the `cardano-cli`. It's essential to have your `protocol-parameters` updated to construct on-chain transactions. 
+
 ## Setup
 
-First we make sure our `protocol-parameters` are updated by executing the following command:
+1. **Update Protocol Parameters**:
+   Execute the following command to ensure your `protocol-parameters` are updated:
 
 ```sh
 cardano-cli query protocol-parameters --testnet-magic ${CARDANO_NODE_MAGIC} > ./assets/pp.json
 ```
 
-To construct on-chain transactions, we'll need the address of the  `plutus` script we've just compiled. For this, run the following command:
+2. Generate Script Address:
+- To interact with the smart contract, generate the address of the plutus script using the following command:
 
 ```sh
 cardano-cli address build \
@@ -114,10 +135,13 @@ cardano-cli address build \
   --out-file ./assets/alwaysTrueV2.addr
 ```
 
-> **Note**
-> The `CARDANO_NODE_MAGIC` env variable is set automatically by the Cardano Workspace.
+> Note:
+> 
+> The CARDANO_NODE_MAGIC environment variable is automatically set by the Cardano Workspace.
+Ensure the alwaysTrueV2.plutus file has been successfully generated as outlined in the Quick Start section.
 
-Next we will need to generate a `payment` key-pair that will serve as our `Cardano Wallet Key`:
+3. Generate Payment Key-Pair:
+- Create a payment key-pair that will serve as your Cardano Wallet Key using the following command:
 
 ```sh
 cardano-cli address key-gen \
@@ -125,7 +149,8 @@ cardano-cli address key-gen \
 --signing-key-file ./assets/payment.skey
 ```
 
-Using the key-pair we will then generate our wallet address:
+4. Generate Wallet Address:
+- With the key-pair generated, create your wallet address:
 
 ```sh
 cardano-cli address build \
@@ -134,49 +159,38 @@ cardano-cli address build \
 --testnet-magic ${CARDANO_NODE_MAGIC}
 ```
 
-We can view the actual wallet address value with the following command:
+To view the actual wallet address value, use the following command:
 
 ```sh
 cat ./assets/payment.addr
 > addr_test1vp0l8elw4c5zr224869vvw2qldwpekym72q529nj4gzlhfgmaan79
 ```
 
-Assuming you just generated the `payment` keys and wallet address as instructed above, then there should be no balance available.
-
-> **Note**
-> If you have an existing `payment` key-pair feel free to use that instead.
-
-We can check the `balance` or `utxos` inside the wallet address with the following command:
+5. Check Wallet Balance:
+- Initially, your wallet balance will be zero. To check the balance or utxos inside the wallet address, use the following command:
 
 ```sh
 cardano-cli query utxo --address $(cat ./assets/payment.addr) --testnet-magic ${CARDANO_NODE_MAGIC}
-
-                           TxHash                                 TxIx        Amount
---------------------------------------------------------------------------------------
 ```
-You can obtain some `test ADA` or `tADA` via the [Cardano Testnet Faucet](https://docs.cardano.org/cardano-testnet/tools/faucet).
 
-> **Note**
-> If you are using `--testnet-magic ${CARDANO_NODE_MAGIC}` then you should choose `preview` network in the faucet options.
+6. Obtain Test ADA:
+- Acquire some test ADA (tADA) from the [Cardano Testnet Faucet](https://docs.cardano.org/cardano-testnet/tools/faucet).
 
-Once you have requested some funds via the [Cardano Testnet Faucet](https://docs.cardano.org/cardano-testnet/tools/faucet). then querying your wallet address `utxos` should looke like this:
+> Note:
+> 
+> If using --testnet-magic ${CARDANO_NODE_MAGIC}, select the preview network in the faucet options.
+Once you've obtained test ADA, querying your wallet address utxos should display your updated balance.
 
-
-```sh
-                           TxHash                                 TxIx        Amount
---------------------------------------------------------------------------------------
-
-5a6b938debc6b2c9bc425c7fa35b59fc50e1e1654fa97f009b21dc6742925332     1        10000000000 lovelace + TxOutDatumNone
-```
+The above steps prepare your environment for interacting with the smart contract on the Cardano testnet. The next section, Testing the AlwaysTrue Plutus contract, will guide you through sending ADA to the contract address and attempting to unlock it.
 
 ## Testing the AlwaysTrue Plutus contract
 
-To test the contract we can try to send `5 ADA` to the contract address and try to unlock it and send it back to your wallet address.
+This section demonstrates how to send ADA to the contract address, attempt to unlock it, and send it back to your wallet address. 
 
-We can send `ADA` to the contract with the following command:
-
+1. **Sending ADA to the Contract**:
+- Build the transaction to send `5 ADA` to the contract address:
+   
 ```sh
-# Build the transaction
 cardano-cli transaction build --babbage-era --testnet-magic ${CARDANO_NODE_MAGIC} \
 --tx-in TxHash#TxIndex \
 --tx-out $(cat ./assets/alwaysTrueV2.addr)+5000000 \
@@ -184,10 +198,10 @@ cardano-cli transaction build --babbage-era --testnet-magic ${CARDANO_NODE_MAGIC
 --change-address $(cat ./assets/payment.addr) \
 --out-file ./assets/tx.raw
 ```
-> **Note**
-> Make sure you put the proper `TxHash` and `TxIndex` with your available wallet `utxos`.
-
-Since the contract will always allow any asset to be unlocked from it and ignores whatever `datum` and `redeemer` you pass into it. We attach a arbitrary `datum` to the transaction `--tx-out-datum-hash-file ./assets/myDatum.json`
+> Note:
+> 
+> Replace TxHash and TxIndex with your available wallet utxos.
+Since the contract always unlocks any asset and ignores the datum and redeemer values, an arbitrary datum is attached to the transaction using --tx-out-datum-hash-file ./assets/myDatum.json.
 
 ```json
 {
@@ -198,17 +212,19 @@ Since the contract will always allow any asset to be unlocked from it and ignore
 }
 ```
 
-Next we sign and submit the transaction:
+2. Sign and Submit the Transaction:
+  - Sign the transaction with your payment signing key and submit it to the Cardano Network:
 
 ```sh
 # Sign with your payment signing key
 cardano-cli transaction sign --tx-body-file ./assets/tx.raw --signing-key-file ./assets/payment.skey --testnet-magic ${CARDANO_NODE_MAGIC} --out-file ./assets/tx.signed
 
 # Submit the transaction to the Cardano Network
-cardano-cli transaction submit --testnet-magic ${CARDANO_NODE_MAGIC} --tx-file ./assets/tx.signed 
+cardano-cli transaction submit --testnet-magic ${CARDANO_NODE_MAGIC} --tx-file ./assets/tx.signed
 ```
 
-We can query the `utxos` of the contract address:
+3. Query Contract UTXOs:
+  - Check the utxos of the contract address to see the 5 ADA you sent:
 
 ```sh
 cardano-cli query utxo --address $(cat ./assets/alwaysTrueV2.addr) --testnet-magic ${CARDANO_NODE_MAGIC}
@@ -225,30 +241,39 @@ We should be able to see the `5 ADA` we just sent to the contract.
 
 ### Reference Scripts
 
-One important feature that the recent [Cardano Vasil Hard Fork]() has enabled is something called [Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033). It essentially allows transactions to reference a plutus script rather than requiring it to be attached to every transaction, which was the case with `PlutusV1`. Ultimately saving room for more transaction size and fees to allocate elsewhere if needed.
+The [Cardano Vasil Hard Fork](link-to-vasil-hard-fork-details) introduced the concept of [Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033), allowing transactions to reference a Plutus script rather than requiring the script to be attached to every transaction. This innovation optimizes transaction size and fee allocation. This section demonstrates how to upload a Plutus script to the Cardano blockchain and use it as a reference script.
 
-The following command will upload a `plutus` script to the `cardano` blockchain and use it as a reference script.
+1. **Uploading Plutus Script**:
+  - Build a transaction with a Plutus reference script attached to it using the following command:
 
 ```sh
-# Build Tx wih a plutus reference script attached to it
+# Build Tx with a Plutus reference script attached to it
 cardano-cli transaction build --babbage-era --testnet-magic ${CARDANO_NODE_MAGIC} \
 --tx-in TxHash#TxIndex \
 --tx-out $(cat ./assets/payment.addr)+15000000 \
 --tx-out-reference-script-file ./assets/alwaysTrueV2.plutus \
 --change-address $(cat ./assets/payment.addr) \
 --out-file ./assets/tx.raw
+```
 
+> Note:
+>
+> Replace TxHash and TxIndex with your available wallet utxos.
+>
+> You are sending this ADA to yourself, so you don't lose the ADA. You are just attaching the Plutus script to the output.
+
+1. Signing and Submitting the Transaction:
+  - Sign the transaction with your payment signing key and submit it to the Cardano Network:
+
+```sh
 # Sign with your payment signing key
 cardano-cli transaction sign --tx-body-file ./assets/tx.raw --signing-key-file ./assets/payment.skey --testnet-magic ${CARDANO_NODE_MAGIC} --out-file ./assets/tx.signed
-
 # Submit the transaction to the Cardano Network
 cardano-cli transaction submit --testnet-magic ${CARDANO_NODE_MAGIC} --tx-file ./assets/tx.signed
 ```
 
-> **Note**
-> Make sure you put the proper `TxHash` and `TxIndex` with your available wallet `utxos`.
-
-Before interacting with `Cardano Smart-Contracts`, a user needs to have a `utxo` with a minimum amount of `ADA` that can be used as [collateral](https://docs.cardano.org/plutus/collateral-mechanism).  (e.g `5 ADA`)
+2. Setting Up Collateral:
+- Before interacting with Cardano Smart Contracts, ensure you have a UTXO with a minimum amount of ADA to be used as collateral. For instance, send 5 ADA to yourself to be used as collateral input:
 
 > **Note**
 > Although the **Vasil** hardfork has improved the concept of collateral in cardano, We will not cover it in this document so we will use the (old) `Alonzo era` usage of collateral.
@@ -269,7 +294,8 @@ cardano-cli transaction submit --testnet-magic ${CARDANO_NODE_MAGIC} --tx-file .
 
 ```
 
-Finally we can execute the script logic to **unlock** the `5 ADA` that we have **locked** previously at the contract address.
+3. Executing Script Logic to Unlock ADA:
+- Execute the script logic to unlock the 5 ADA that was previously locked at the contract address:
 
 ```sh
 # Unlock the 5 ADA from the contract address and send it to your wallet address
@@ -291,13 +317,10 @@ cardano-cli transaction sign --tx-body-file ./assets/tx.raw --signing-key-file .
 cardano-cli transaction submit --testnet-magic ${CARDANO_NODE_MAGIC} --tx-file ./assets/tx.signed 
 ```
 
-> **Note**
-> We did not have to attach a `.plutus` script in this transaction and instead used a reference of the `.plutus` script we wanted to execute!
-
-> **Breakdown**
+> Note:
 > 
-> - `LockedUTXOTxHash#LockedUTXOTxIndex` is the UTXO of the `ADA` you locked at the script address.
-> - `CollateralTxHash#CollateralTxIndex` is the UTXO of the `5 ADA` we sent to our wallet address that we will use as collateral.
-> - `RefScriptTxHash#RefScriptTxIndex` is the UTXO of the [Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033) we uploaded above to be used as the `validation logic` for this transaction.
+> Unlike previous transactions, there’s no need to attach a .plutus script in this transaction. Instead, a reference of the .plutus script uploaded earlier is used to execute the script logic.
 
-Congratulations 🎊🎊🎊, you have compiled and interacted with a `Cardano on-chain PlutusV2 script` using the [Reference Scripts](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0033) feature!
+Through this process, you've compiled and interacted with a Cardano on-chain PlutusV2 script using the Reference Scripts feature, significantly optimizing the transaction process on the Cardano blockchain.
+
+Congratulations 🎉, you have explored an essential feature of PlutusV2 smart contracts on the Cardano network!
