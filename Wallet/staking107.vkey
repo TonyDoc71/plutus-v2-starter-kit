@@ -1,0 +1,5 @@
+{
+    "type": "StakeVerificationKeyShelley_ed25519",
+    "description": "Stake Verification Key",
+    "cborHex": "58200f8506e5312b59c4c8d938c64d6f197c5496b3f262a68ca2ef3f5635afe5ee92"
+}
